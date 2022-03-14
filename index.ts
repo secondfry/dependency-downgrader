@@ -143,9 +143,7 @@ const checkPackage = async (date: string, packageName: string, requestedVersion:
   }
 
   console.log(`#! ${packageName}@${actualVersion}: downgrade required.`);
-  let versions = Object.keys(info.time);
-  versions = versions.splice(versions.indexOf('modified'), 1);
-  versions = versions.splice(versions.indexOf('created'), 1);
+  let versions = info.versions;
 
   if (!process.env.USE_PARTIAL_VERSIONS) {
     versions = versions
