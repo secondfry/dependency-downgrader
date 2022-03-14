@@ -160,8 +160,8 @@ const checkPackage = async (date: string, packageName: string, requestedVersion:
   // eslint-disable-next-line no-constant-condition
   while (true) {
     if (versions.length == 1) {
-      if (versions[0] == actualVersion) {
-        console.log(`#  ${packageName}@${versions[0]}: installed version is the earliest already.`);
+      if (info.time[versions[0]!]! > date) {
+        console.log(`#  ${packageName}@${versions[0]}: package is older than date entirely.`);
         return false;
       }
 
