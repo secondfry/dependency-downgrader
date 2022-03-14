@@ -119,7 +119,15 @@ const getNpmInfo = async (packageName: string, requestedVersion: string) => {
 };
 
 const checkPackage = async (date: string, packageName: string, requestedVersion: string, actualVersion: string) => {
-  const info = await getNpmInfo(packageName, requestedVersion);
+  let info: NpmInfo;
+  try {
+    info = await getNpmInfo(packageName, requestedVersion);
+  } catch (err) {
+    console.error(err);
+    console.log(`#! ${packageName}@${requestedVersion}: getNpmInfo failed.`);
+    return false;
+  }
+
   const actualVersionTimestamp = info.time[actualVersion];
 
   if (!actualVersionTimestamp) {
