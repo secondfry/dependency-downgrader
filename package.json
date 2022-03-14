@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "lib/index.js",
+  "bin": "lib/index.js",
   "scripts": {
     "build": "tsc",
     "lint:eslint": "eslint --fix --cache . --ext ts",
