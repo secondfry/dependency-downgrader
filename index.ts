@@ -143,6 +143,8 @@ const checkPackage = async (date: string, packageName: string, requestedVersion:
 
   console.log(`#! ${packageName}@${actualVersion}: downgrade required.`);
   let versions = Object.keys(info.time);
+  versions = versions.splice(versions.indexOf('modified'), 1);
+  versions = versions.splice(versions.indexOf('created'), 1);
 
   if (!process.env.USE_PARTIAL_VERSIONS) {
     versions = versions
@@ -159,6 +161,11 @@ const checkPackage = async (date: string, packageName: string, requestedVersion:
   // eslint-disable-next-line no-constant-condition
   while (true) {
     if (versions.length == 1) {
+      if (versions[0] == actualVersion) {
+        console.log(`#  ${packageName}@${versions[0]}: installed version is the earliest already.`);
+        return false;
+      }
+
       console.log(`#  ${packageName}@${versions[0]}: ${info.time[versions[0]!]}.`);
       console.log(`npm install ${packageName}@${versions[0]}`);
       return false;
