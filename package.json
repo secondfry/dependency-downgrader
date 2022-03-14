@@ -1,5 +1,5 @@
 {
-  "name": "npm-dependency-downgrader",
+  "name": "dependency-downgrader",
   "version": "1.0.0",
   "description": "",
   "main": "lib/index.js",
@@ -24,5 +24,5 @@
     "prettier": "^2.5.1",
     "typescript": "^4.6.2"
   },
-  "repository": "github:secondfry/npm-dependency-downgrader"
+  "repository": "github:secondfry/dependency-downgrader"
 }
