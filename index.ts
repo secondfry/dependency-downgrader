@@ -32,18 +32,18 @@ type Package = {
   integrity: string;
   dev: boolean;
   requires: Dependencies;
-}
+};
 
 type PackageLockV2 = {
   lockfileVersion: 2;
   packages: {
-    "": {
+    '': {
       dependencies?: Dependencies;
       devDependencies?: Dependencies;
-    }
-  }
+    };
+  };
   dependencies: { [packageName: string]: Package };
-}
+};
 
 type NpmInfo = {
   _id: string;
@@ -69,7 +69,7 @@ type NpmInfo = {
   _cached: boolean;
   _contentLength: number;
   version: string;
-}
+};
 
 const getCacheDirectory = () => {
   const homedir = os.homedir();
@@ -103,7 +103,7 @@ const getNpmInfo = async (packageName: string, requestedVersion: string) => {
     const cache: NpmInfo = JSON.parse(cacheFile);
 
     return cache;
-  } while (false);
+  } while (false); // eslint-disable-line no-constant-condition
 
   const infoResult = await sh(`npm info --json ${packageName}@${requestedVersion}`);
   const info: NpmInfo = JSON.parse(infoResult.stdout);
@@ -116,7 +116,7 @@ const getNpmInfo = async (packageName: string, requestedVersion: string) => {
   fs.writeFileSync(cacheFilePath, JSON.stringify(info), 'utf-8');
 
   return info;
-}
+};
 
 const checkPackage = async (date: string, packageName: string, requestedVersion: string, actualVersion: string) => {
   const info = await getNpmInfo(packageName, requestedVersion);
@@ -136,6 +136,7 @@ const checkPackage = async (date: string, packageName: string, requestedVersion:
   console.log(`#! ${packageName}@${actualVersion}: downgrade required.`);
   let versions = Object.keys(info.time);
 
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     if (versions.length == 1) {
       console.log(`npm install ${packageName}@${versions[0]}`);
@@ -162,7 +163,7 @@ const walkDependencies = async (date: string, packageLock: PackageLockV2, deps: 
       }
 
       return checkPackage(date, packageName, requestedVersion, actualVersion);
-    })
+    }),
   );
 };
 
@@ -185,15 +186,14 @@ const main = async () => {
   const packageLockFile = fs.readFileSync(path.join(prefix, 'package-lock.json'), 'utf8');
   const packageLock: PackageLockV2 = JSON.parse(packageLockFile);
 
-  const dependencies = packageLock.packages[""].dependencies ?? {};
-  const devDependencies = packageLock.packages[""].devDependencies ?? {};
+  const dependencies = packageLock.packages[''].dependencies ?? {};
+  const devDependencies = packageLock.packages[''].devDependencies ?? {};
 
   await walkDependencies(dateString, packageLock, dependencies);
   await walkDependencies(dateString, packageLock, devDependencies);
 };
 
-main()
-  .catch(err => {
-    console.log(`#! ${err.message}`);
-    console.error(err);
-  });
+main().catch((err) => {
+  console.log(`#! ${err.message}`);
+  console.error(err);
+});

@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "lint:eslint": "eslint --fix --cache . --ext ts",
-    "lint:prettier": "prettier --write **/*.ts",
+    "lint:prettier": "prettier --write **/*.ts *.ts",
     "lint": "npm run lint:eslint && npm run lint:prettier",
     "prepublish": "npm run build",
     "preversion": "npm run test",
