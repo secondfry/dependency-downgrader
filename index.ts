@@ -151,6 +151,7 @@ const checkPackage = async (date: string, packageName: string, requestedVersion:
   // eslint-disable-next-line no-constant-condition
   while (true) {
     if (versions.length == 1) {
+      console.log(`#  ${packageName}@${versions[0]}: ${info.time[versions[0]!]}.`);
       console.log(`npm install ${packageName}@${versions[0]}`);
       return false;
     }
