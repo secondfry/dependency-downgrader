@@ -22,5 +22,6 @@
     "eslint-config-prettier": "^8.5.0",
     "prettier": "^2.5.1",
     "typescript": "^4.6.2"
-  }
+  },
+  "repository": "github:secondfry/npm-dependency-date"
 }
