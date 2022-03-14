@@ -106,7 +106,8 @@ const getNpmInfo = async (packageName: string, requestedVersion: string) => {
   } while (false); // eslint-disable-line no-constant-condition
 
   const infoResult = await sh(`npm info --json ${packageName}@${requestedVersion}`);
-  const info: NpmInfo = JSON.parse(infoResult.stdout);
+  const data = JSON.parse(infoResult.stdout);
+  const info: NpmInfo = Array.isArray(data) ? data[0] : data;
 
   const cacheFileBaseDir = path.dirname(cacheFilePath);
   if (!fs.existsSync(cacheFileBaseDir)) {
