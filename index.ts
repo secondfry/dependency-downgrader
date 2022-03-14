@@ -168,7 +168,7 @@ const checkPackage = async (date: string, packageName: string, requestedVersion:
       }
 
       console.log(`#  ${packageName}@${versions[0]}: ${info.time[versions[0]!]}.`);
-      console.log(`npm install ${packageName}@${versions[0]}`);
+      console.log(`npm install --save-exact ${packageName}@${versions[0]}`);
       return false;
     }
 
