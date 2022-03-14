@@ -1,0 +1,17 @@
+{
+  "extends": "@tsconfig/node16/tsconfig.json",
+  "compilerOptions": {
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "paths": {
+      "root/*": [ "./*" ],
+    },
+    "composite": true,
+    "outDir": "lib",
+    "sourceMap": true,
+    "lib": ["DOM","ES2021"]
+  }
+}

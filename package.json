@@ -1,0 +1,26 @@
+{
+  "name": "npm-dependency-date",
+  "version": "1.0.0",
+  "description": "",
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "tsc",
+    "lint:eslint": "eslint --fix --cache . --ext ts",
+    "lint:prettier": "prettier --write **/*.ts",
+    "lint": "npm run lint:eslint && npm run lint:prettier",
+    "prepublish": "npm run build",
+    "preversion": "npm run test",
+    "test": "npm run lint"
+  },
+  "author": "Rustam SecondFry Gubaydullin <secondfry+npm@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@tsconfig/node16": "^1.0.2",
+    "@typescript-eslint/eslint-plugin": "^5.14.0",
+    "@typescript-eslint/parser": "^5.14.0",
+    "eslint": "^8.11.0",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.6.2"
+  }
+}
