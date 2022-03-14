@@ -86,6 +86,10 @@ const getNpmInfo = async (packageName: string, requestedVersion: string) => {
   const cachedir = getCacheDirectory();
   const cacheFilePath = path.join(cachedir, `${packageName}.json`);
   do {
+    if (process.env.IGNORE_CACHE) {
+      break;
+    }
+
     if (!fs.existsSync(cacheFilePath)) {
       break;
     }
