@@ -136,6 +136,18 @@ const checkPackage = async (date: string, packageName: string, requestedVersion:
   console.log(`#! ${packageName}@${actualVersion}: downgrade required.`);
   let versions = Object.keys(info.time);
 
+  if (!process.env.USE_PARTIAL_VERSIONS) {
+    versions = versions
+      .map((x) => {
+        if (x.split('-').length > 1) {
+          return '';
+        }
+
+        return x;
+      })
+      .filter(Boolean);
+  }
+
   // eslint-disable-next-line no-constant-condition
   while (true) {
     if (versions.length == 1) {
