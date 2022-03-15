@@ -3,6 +3,10 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 
+type ProcessedPackagesRegistry = { [packageName: string]: true };
+
+const PROCESSED_PACKAGES: ProcessedPackagesRegistry = {};
+
 type CommandResult = {
   stdout: string;
   stderr: string;
@@ -130,6 +134,11 @@ type CheckPackageOptions = {
 };
 
 const checkPackage = async ({ actualVersion, date, packageName, requestedVersion, saveType }: CheckPackageOptions) => {
+  if (PROCESSED_PACKAGES[packageName]) {
+    return;
+  }
+  PROCESSED_PACKAGES[packageName] = true;
+
   if (!requestedVersion) {
     requestedVersion = actualVersion;
   }
