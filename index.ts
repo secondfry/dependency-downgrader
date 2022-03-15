@@ -1,3 +1,9 @@
+/**
+ * Using package name regexp:
+ * https://www.npmjs.com/package/package-name-regex
+ * Copyright © Sebastian Landwehr info@sebastianlandwehr.com
+ */
+
 import { exec } from 'child_process';
 import fs from 'fs';
 import os from 'os';
@@ -110,6 +116,25 @@ const getNpmInfo = async (packageName: string, requestedVersion: string) => {
 
     return cache;
   } while (false); // eslint-disable-line no-constant-condition
+
+  /**
+   * I had a problem and I've used regexp to fix it...
+   * @link https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
+   */
+  const semverRegexp =
+    /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
+  if (!requestedVersion.match(semverRegexp)) {
+    throw new Error(`Are you getting attacked? ${requestedVersion} doesn't match monstrous semver regexp.`);
+  }
+
+  /**
+   * It is a really sad day.
+   * @link https://github.com/dword-design/package-name-regex/blob/master/src/index.js
+   */
+  const packageNameRegexp = /^(@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/;
+  if (!packageName.match(packageNameRegexp)) {
+    throw new Error(`Are you getting attacked? ${packageName} doesn't match package name regexp.`);
+  }
 
   const infoResult = await sh(`npm info --json ${packageName}@${requestedVersion}`);
   const data = JSON.parse(infoResult.stdout);
