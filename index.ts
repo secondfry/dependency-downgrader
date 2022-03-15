@@ -24,25 +24,27 @@ const sh = (cmd: string) => {
   });
 };
 
-type Dependencies = { [packageName: string]: string };
+type RequireList = { [packageName: string]: string };
+type DependencyGraph = { [packageName: string]: Package };
 
 type Package = {
   version: string;
   resolved: string;
   integrity: string;
   dev: boolean;
-  requires: Dependencies;
+  requires?: RequireList;
+  dependencies?: DependencyGraph;
 };
 
 type PackageLockV2 = {
   lockfileVersion: 2;
   packages: {
     '': {
-      dependencies?: Dependencies;
-      devDependencies?: Dependencies;
+      dependencies?: RequireList;
+      devDependencies?: RequireList;
     };
   };
-  dependencies: { [packageName: string]: Package };
+  dependencies: DependencyGraph;
 };
 
 type NpmInfo = {
@@ -119,7 +121,19 @@ const getNpmInfo = async (packageName: string, requestedVersion: string) => {
   return info;
 };
 
-const checkPackage = async (date: string, packageName: string, requestedVersion: string, actualVersion: string) => {
+type CheckPackageOptions = {
+  actualVersion: string;
+  date: string;
+  packageName: string;
+  requestedVersion?: string;
+  saveType: 'exact' | 'peer';
+};
+
+const checkPackage = async ({ actualVersion, date, packageName, requestedVersion, saveType }: CheckPackageOptions) => {
+  if (!requestedVersion) {
+    requestedVersion = actualVersion;
+  }
+
   let info: NpmInfo;
   try {
     info = await getNpmInfo(packageName, requestedVersion);
@@ -166,7 +180,7 @@ const checkPackage = async (date: string, packageName: string, requestedVersion:
       }
 
       console.log(`#  ${packageName}@${versions[0]}: ${info.time[versions[0]!]}.`);
-      console.log(`npm install --save-exact ${packageName}@${versions[0]}`);
+      console.log(`npm install --save-${saveType} ${packageName}@${versions[0]}`);
       return false;
     }
 
@@ -180,7 +194,7 @@ const checkPackage = async (date: string, packageName: string, requestedVersion:
   }
 };
 
-const walkDependencies = async (date: string, packageLock: PackageLockV2, deps: Dependencies) => {
+const walkDirectDependencies = async (date: string, packageLock: PackageLockV2, deps: RequireList) => {
   return Promise.all(
     Object.entries(deps).map(async ([packageName, requestedVersion]) => {
       const actualVersion = packageLock.dependencies[packageName]?.version;
@@ -189,9 +203,43 @@ const walkDependencies = async (date: string, packageLock: PackageLockV2, deps: 
         return;
       }
 
-      return checkPackage(date, packageName, requestedVersion, actualVersion);
+      return checkPackage({ date, packageName, requestedVersion, actualVersion, saveType: 'exact' });
     }),
   );
+};
+
+const processNonDirectDependency = async (
+  date: string,
+  packageLock: PackageLockV2,
+  [packageName, packageData]: [string, Package],
+): Promise<void> => {
+  await checkPackage({ date, packageName, actualVersion: packageData.version, saveType: 'peer' });
+
+  if (!packageData.dependencies) {
+    return;
+  }
+
+  await processNonDirectDependencies(date, packageLock, packageData.dependencies);
+};
+
+const processNonDirectDependencies = async (date: string, packageLock: PackageLockV2, deps: DependencyGraph) => {
+  return Promise.all(
+    Object.entries(deps).map(([packageName, packageData]) => {
+      if (packageLock.packages[''].dependencies?.[packageName]) {
+        return;
+      }
+
+      if (packageLock.packages[''].devDependencies?.[packageName]) {
+        return;
+      }
+
+      return processNonDirectDependency(date, packageLock, [packageName, packageData]);
+    }),
+  );
+};
+
+const walkNonDirectDependencies = async (date: string, packageLock: PackageLockV2) => {
+  return processNonDirectDependencies(date, packageLock, packageLock.dependencies);
 };
 
 const main = async () => {
@@ -216,8 +264,15 @@ const main = async () => {
   const dependencies = packageLock.packages[''].dependencies ?? {};
   const devDependencies = packageLock.packages[''].devDependencies ?? {};
 
-  await walkDependencies(dateString, packageLock, dependencies);
-  await walkDependencies(dateString, packageLock, devDependencies);
+  await walkDirectDependencies(dateString, packageLock, dependencies);
+  await walkDirectDependencies(dateString, packageLock, devDependencies);
+
+  if (!process.env.PROCESS_FULL_GRAPH) {
+    return;
+  }
+
+  console.log('\n#  All non-direct dependencies:');
+  await walkNonDirectDependencies(dateString, packageLock);
 };
 
 main().catch((err) => {
