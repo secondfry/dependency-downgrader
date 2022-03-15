@@ -7,6 +7,7 @@ Zero dependency dependency date checker and downgrade script generator.
 npm install dependency-downgrader
 npx dependency-downgrader 2022-02-22 > result.sh 2> log.txt
 sh result.sh
+npm audit
 ```
 
 Feeling lucky?
