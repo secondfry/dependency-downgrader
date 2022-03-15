@@ -120,9 +120,10 @@ const getNpmInfo = async (packageName: string, requestedVersion: string) => {
   /**
    * I had a problem and I've used regexp to fix it...
    * @link https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
+   * @link https://regex101.com/r/esRA7X/1
    */
   const semverRegexp =
-    /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
+    /^(?:\*|x|[~^]?(0|[1-9]\d*)(?:\.(?:\*|x|(0|[1-9]\d*)(?:\.(?:\*|x|(0|[1-9]\d*)))?))?)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
   if (!requestedVersion.match(semverRegexp)) {
     throw new Error(`Are you getting attacked? ${requestedVersion} doesn't match monstrous semver regexp.`);
   }
