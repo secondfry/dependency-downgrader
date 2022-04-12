@@ -27,5 +27,6 @@ PROCESS_FULL_GRAPH=1 npx -y dependency-downgrader 2022-02-22 | sh
 | Environment variable   | Description                         |
 | ---------------------- | ----------------------------------- |
 | `IGNORE_CACHE`         | Forces `npm info` call              |
-| `USE_PARTIAL_VERSIONS` | Allows `rc`, `beta`, etc. versions  |
+| `MAX_BUFFER_FOR_EXEC`  | Sets custom buffer length for exec  |
 | `PROCESS_FULL_GRAPH`   | Adds full dependency graph analysis |
+| `USE_PARTIAL_VERSIONS` | Allows `rc`, `beta`, etc. versions  |

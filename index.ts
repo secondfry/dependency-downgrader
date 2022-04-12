@@ -21,16 +21,22 @@ type CommandResult = {
 const sh = (cmd: string) => {
   return new Promise<CommandResult>((resolve, reject) => {
     console.error('[node.js]>', cmd);
-    exec(cmd, (err, stdout, stderr) => {
-      if (stdout) console.error(`> stdout\n${stdout}< stdout`);
-      if (stderr) console.error(`> stderr\n${stderr}< stderr`);
+    exec(
+      cmd,
+      {
+        maxBuffer: Number(process.env.MAX_BUFFER_FOR_EXEC ?? 5 * 1024 * 1024),
+      },
+      (err, stdout, stderr) => {
+        if (stdout) console.error(`> stdout\n${stdout}< stdout`);
+        if (stderr) console.error(`> stderr\n${stderr}< stderr`);
 
-      if (err) {
-        return reject(err);
-      }
+        if (err) {
+          return reject(err);
+        }
 
-      resolve({ stdout, stderr });
-    });
+        resolve({ stdout, stderr });
+      },
+    );
   });
 };
 
