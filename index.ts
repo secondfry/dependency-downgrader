@@ -133,19 +133,26 @@ const getNpmInfo = async (packageName: string, requestedVersion: string) => {
   const semverRegexp =
     /^(?:\*|x|[~^]?(0|[1-9]\d*)(?:\.(?:\*|x|(0|[1-9]\d*)(?:\.(?:\*|x|(0|[1-9]\d*)))?))?)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
   if (!requestedVersion.match(semverRegexp)) {
-    throw new Error(`Are you getting attacked? ${requestedVersion} doesn't match monstrous semver regexp.`);
+    throw new Error(
+      `Are you getting attacked? ${requestedVersion} doesn't match monstrous semver regexp.`,
+    );
   }
 
   /**
    * It is a really sad day.
    * @link https://github.com/dword-design/package-name-regex/blob/master/src/index.js
    */
-  const packageNameRegexp = /^(@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/;
+  const packageNameRegexp =
+    /^(@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/;
   if (!packageName.match(packageNameRegexp)) {
-    throw new Error(`Are you getting attacked? ${packageName} doesn't match package name regexp.`);
+    throw new Error(
+      `Are you getting attacked? ${packageName} doesn't match package name regexp.`,
+    );
   }
 
-  const infoResult = await sh(`npm info --json ${packageName}@${requestedVersion}`);
+  const infoResult = await sh(
+    `npm info --json ${packageName}@${requestedVersion}`,
+  );
   const data = JSON.parse(infoResult.stdout);
   const info: NpmInfo = Array.isArray(data) ? data[0] : data;
 
@@ -167,7 +174,13 @@ type CheckPackageOptions = {
   saveType: 'exact' | 'peer';
 };
 
-const checkPackage = async ({ actualVersion, date, packageName, requestedVersion, saveType }: CheckPackageOptions) => {
+const checkPackage = async ({
+  actualVersion,
+  date,
+  packageName,
+  requestedVersion,
+  saveType,
+}: CheckPackageOptions) => {
   if (PROCESSED_PACKAGES[packageName]) {
     return;
   }
@@ -218,12 +231,18 @@ const checkPackage = async ({ actualVersion, date, packageName, requestedVersion
   while (true) {
     if (versions.length == 1) {
       if (info.time[versions[0]!]! > date) {
-        console.log(`#  ${packageName}@${versions[0]}: package is older than date entirely.`);
+        console.log(
+          `#  ${packageName}@${versions[0]}: package is older than date entirely.`,
+        );
         return false;
       }
 
-      console.log(`#  ${packageName}@${versions[0]}: ${info.time[versions[0]!]}.`);
-      console.log(`npm install --save-${saveType} ${packageName}@${versions[0]}`);
+      console.log(
+        `#  ${packageName}@${versions[0]}: ${info.time[versions[0]!]}.`,
+      );
+      console.log(
+        `npm install --save-${saveType} ${packageName}@${versions[0]}`,
+      );
       return false;
     }
 
@@ -243,16 +262,29 @@ const EMPTY = () => {
   /* yes */
 };
 
-const walkDirectDependencies = async (date: string, packageLock: PackageLockV2, deps: RequireList) => {
+const walkDirectDependencies = async (
+  date: string,
+  packageLock: PackageLockV2,
+  deps: RequireList,
+) => {
   await parallelLimit(
     Object.entries(deps).map(([packageName, requestedVersion]) => {
       const actualVersion = packageLock.dependencies[packageName]?.version;
       if (!actualVersion) {
-        console.log(`#! package-lock.json is missing .dependecies.${packageName}`);
+        console.log(
+          `#! package-lock.json is missing .dependecies.${packageName}`,
+        );
         return EMPTY;
       }
 
-      return async () => await checkPackage({ date, packageName, requestedVersion, actualVersion, saveType: 'exact' });
+      return async () =>
+        await checkPackage({
+          date,
+          packageName,
+          requestedVersion,
+          actualVersion,
+          saveType: 'exact',
+        });
     }),
     PARALLEL_LIMIT,
   );
@@ -263,16 +295,29 @@ const processNonDirectDependency = async (
   packageLock: PackageLockV2,
   [packageName, packageData]: [string, Package],
 ): Promise<void> => {
-  await checkPackage({ date, packageName, actualVersion: packageData.version, saveType: 'peer' });
+  await checkPackage({
+    date,
+    packageName,
+    actualVersion: packageData.version,
+    saveType: 'peer',
+  });
 
   if (!packageData.dependencies) {
     return;
   }
 
-  await processNonDirectDependencies(date, packageLock, packageData.dependencies);
+  await processNonDirectDependencies(
+    date,
+    packageLock,
+    packageData.dependencies,
+  );
 };
 
-const processNonDirectDependencies = async (date: string, packageLock: PackageLockV2, deps: DependencyGraph) => {
+const processNonDirectDependencies = async (
+  date: string,
+  packageLock: PackageLockV2,
+  deps: DependencyGraph,
+) => {
   await parallelLimit(
     Object.entries(deps).map(([packageName, packageData]) => {
       if (packageLock.packages[''].dependencies?.[packageName]) {
@@ -283,14 +328,25 @@ const processNonDirectDependencies = async (date: string, packageLock: PackageLo
         return EMPTY;
       }
 
-      return async () => await processNonDirectDependency(date, packageLock, [packageName, packageData]);
+      return async () =>
+        await processNonDirectDependency(date, packageLock, [
+          packageName,
+          packageData,
+        ]);
     }),
     PARALLEL_LIMIT,
   );
 };
 
-const walkNonDirectDependencies = async (date: string, packageLock: PackageLockV2) => {
-  return processNonDirectDependencies(date, packageLock, packageLock.dependencies);
+const walkNonDirectDependencies = async (
+  date: string,
+  packageLock: PackageLockV2,
+) => {
+  return processNonDirectDependencies(
+    date,
+    packageLock,
+    packageLock.dependencies,
+  );
 };
 
 const main = async () => {
@@ -309,7 +365,10 @@ const main = async () => {
   const prefixResult = await sh('npm prefix');
   const prefix = prefixResult.stdout.trim();
 
-  const packageLockFile = fs.readFileSync(path.join(prefix, 'package-lock.json'), 'utf8');
+  const packageLockFile = fs.readFileSync(
+    path.join(prefix, 'package-lock.json'),
+    'utf8',
+  );
   const packageLock: PackageLockV2 = JSON.parse(packageLockFile);
 
   const dependencies = packageLock.packages[''].dependencies ?? {};
