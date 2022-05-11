@@ -9,6 +9,8 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 
+import { parallelLimit } from 'async';
+
 type ProcessedPackagesRegistry = { [packageName: string]: true };
 
 const PROCESSED_PACKAGES: ProcessedPackagesRegistry = {};
@@ -235,17 +237,24 @@ const checkPackage = async ({ actualVersion, date, packageName, requestedVersion
   }
 };
 
+const PARALLEL_LIMIT = Number(process.env.PARALLEL_LIMIT) || 8;
+
+const EMPTY = () => {
+  /* yes */
+};
+
 const walkDirectDependencies = async (date: string, packageLock: PackageLockV2, deps: RequireList) => {
-  return Promise.all(
-    Object.entries(deps).map(async ([packageName, requestedVersion]) => {
+  await parallelLimit(
+    Object.entries(deps).map(([packageName, requestedVersion]) => {
       const actualVersion = packageLock.dependencies[packageName]?.version;
       if (!actualVersion) {
         console.log(`#! package-lock.json is missing .dependecies.${packageName}`);
-        return;
+        return EMPTY;
       }
 
-      return checkPackage({ date, packageName, requestedVersion, actualVersion, saveType: 'exact' });
+      return async () => await checkPackage({ date, packageName, requestedVersion, actualVersion, saveType: 'exact' });
     }),
+    PARALLEL_LIMIT,
   );
 };
 
@@ -264,18 +273,19 @@ const processNonDirectDependency = async (
 };
 
 const processNonDirectDependencies = async (date: string, packageLock: PackageLockV2, deps: DependencyGraph) => {
-  return Promise.all(
+  await parallelLimit(
     Object.entries(deps).map(([packageName, packageData]) => {
       if (packageLock.packages[''].dependencies?.[packageName]) {
-        return;
+        return EMPTY;
       }
 
       if (packageLock.packages[''].devDependencies?.[packageName]) {
-        return;
+        return EMPTY;
       }
 
-      return processNonDirectDependency(date, packageLock, [packageName, packageData]);
+      return async () => await processNonDirectDependency(date, packageLock, [packageName, packageData]);
     }),
+    PARALLEL_LIMIT,
   );
 };
 
