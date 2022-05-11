@@ -1,6 +1,6 @@
 {
   "name": "dependency-downgrader",
-  "version": "1.2.3",
+  "version": "1.3.0",
   "description": "",
   "bin": "lib/script.js",
   "scripts": {
