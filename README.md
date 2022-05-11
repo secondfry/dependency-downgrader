@@ -24,9 +24,10 @@ PROCESS_FULL_GRAPH=1 npx -y dependency-downgrader 2022-02-22 | sh
 ```
 
 ## Options
-| Environment variable   | Description                         |
-| ---------------------- | ----------------------------------- |
-| `IGNORE_CACHE`         | Forces `npm info` call              |
-| `MAX_BUFFER_FOR_EXEC`  | Sets custom buffer length for exec  |
-| `PROCESS_FULL_GRAPH`   | Adds full dependency graph analysis |
-| `USE_PARTIAL_VERSIONS` | Allows `rc`, `beta`, etc. versions  |
+| Environment variable   | Default         | Description                             |
+| ---------------------- | --------------- | --------------------------------------- |
+| `IGNORE_CACHE`         | undefined       | Forces `npm info` call                  |
+| `MAX_BUFFER_FOR_EXEC`  | 5 * 1024 * 1024 | Sets custom buffer length for exec      |
+| `PARALLEL_LIMIT`       | 8               | Sets parallel dependecy resolving limit |
+| `PROCESS_FULL_GRAPH`   | undefined       | Adds full dependency graph analysis     |
+| `USE_PARTIAL_VERSIONS` | undefined       | Allows `rc`, `beta`, etc. versions      |
